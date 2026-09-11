@@ -1,0 +1,125 @@
+{
+  "manifest_created_at_utc": "2026-09-05T16:04:42.223076Z",
+  "policy": "Raw snapshots are authoritative and immutable for this task. All artifact names were new; no existing file was overwritten.",
+  "github": {
+    "repository": "dazzknowles/home-projects-collab",
+    "issue_number": 9,
+    "issue_id": 5175113374,
+    "issue_node_id": "I_kwDOT7lSd88AAAABNHX2ng",
+    "issue_url": "https://github.com/dazzknowles/home-projects-collab/issues/9",
+    "capture_batch_timestamp_utc": "2026-09-05T15:56:32.908Z",
+    "retrieval_method": "gh api REST only",
+    "issue_created_at_utc": "2026-08-17T20:22:50Z",
+    "issue_updated_at_utc": "2026-09-04T00:50:55Z",
+    "state": "open",
+    "comments_declared": 9,
+    "comments_captured": 9,
+    "comments": [
+      {
+        "id": 5368157208,
+        "node_id": "IC_kwDOT7lSd88AAAABP_eUGA",
+        "created_at_utc": "2026-08-21T09:35:02Z",
+        "updated_at_utc": "2026-08-21T09:35:02Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5368157208"
+      },
+      {
+        "id": 5414342260,
+        "node_id": "IC_kwDOT7lSd88AAAABQrhOdA",
+        "created_at_utc": "2026-08-25T17:41:52Z",
+        "updated_at_utc": "2026-08-25T17:41:52Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5414342260"
+      },
+      {
+        "id": 5414446298,
+        "node_id": "IC_kwDOT7lSd88AAAABQrnk2g",
+        "created_at_utc": "2026-08-25T17:50:54Z",
+        "updated_at_utc": "2026-08-25T17:50:54Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5414446298"
+      },
+      {
+        "id": 5438400203,
+        "node_id": "IC_kwDOT7lSd88AAAABRCdmyw",
+        "created_at_utc": "2026-08-27T11:36:43Z",
+        "updated_at_utc": "2026-08-27T11:36:43Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5438400203"
+      },
+      {
+        "id": 5465379423,
+        "node_id": "IC_kwDOT7lSd88AAAABRcMSXw",
+        "created_at_utc": "2026-08-29T23:00:07Z",
+        "updated_at_utc": "2026-08-29T23:00:07Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5465379423"
+      },
+      {
+        "id": 5465461251,
+        "node_id": "IC_kwDOT7lSd88AAAABRcRSAw",
+        "created_at_utc": "2026-08-29T23:19:55Z",
+        "updated_at_utc": "2026-08-29T23:19:55Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5465461251"
+      },
+      {
+        "id": 5471562039,
+        "node_id": "IC_kwDOT7lSd88AAAABRiFpNw",
+        "created_at_utc": "2026-08-30T22:09:42Z",
+        "updated_at_utc": "2026-08-30T22:09:42Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5471562039"
+      },
+      {
+        "id": 5486376978,
+        "node_id": "IC_kwDOT7lSd88AAAABRwN4Eg",
+        "created_at_utc": "2026-08-31T23:46:47Z",
+        "updated_at_utc": "2026-08-31T23:46:47Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5486376978"
+      },
+      {
+        "id": 5534087904,
+        "node_id": "IC_kwDOT7lSd88AAAABSdt64A",
+        "created_at_utc": "2026-09-04T00:50:55Z",
+        "updated_at_utc": "2026-09-04T00:50:55Z",
+        "html_url": "https://github.com/dazzknowles/home-projects-collab/issues/9#issuecomment-5534087904"
+      }
+    ]
+  },
+  "foxess": {
+    "source_url": "https://www.foxesscloud.com/public/i18n/en/OpenApiDocument.html",
+    "retrieved_at_utc": "2026-09-05T15:56:34.2682286Z",
+    "http_status": 200,
+    "latest_document_changelog_version": "v1.1.18",
+    "latest_document_changelog_date": "2026-05-29",
+    "etag": null,
+    "last_modified": null
+  },
+  "source_snapshots": [
+    {
+      "kind": "github_issue_rest_json",
+      "file_name": "github-dazzknowles-home-projects-collab-issue-9-issue-20260905T155632908Z.json",
+      "bytes": 15086,
+      "sha256": "2b5755b0adc1d75617a9b3c27ab404172a3174e967dc28571da788901b5a46e3"
+    },
+    {
+      "kind": "github_comments_paginated_rest_json",
+      "file_name": "github-dazzknowles-home-projects-collab-issue-9-comments-all-pages-20260905T155632908Z.json",
+      "bytes": 64833,
+      "sha256": "0a1274593885faa4f6bd60bc3cbb99ed5760d8ba81eb8291d6e9ab113edbab0d"
+    },
+    {
+      "kind": "foxess_official_html",
+      "file_name": "foxess-open-api-document-20260905T155632908Z.html",
+      "bytes": 1774458,
+      "sha256": "f109440130bfc94405a508b2c13e4b68ec954e38e57ba617710133d4b843633c"
+    },
+    {
+      "kind": "foxess_http_metadata",
+      "file_name": "foxess-open-api-document-http-metadata-20260905T155632908Z.json",
+      "bytes": 994,
+      "sha256": "96181a9dc70a4ef47170f27a8267d90432ab1ec011d0a56e518cf79c403f999c"
+    }
+  ],
+  "generated_artifact": {
+    "kind": "candidate_specification_markdown",
+    "file_name": "candidate-foxess-read-only-capability-integration-spec-r02-20260905T160144085Z.md",
+    "bytes": 19910,
+    "sha256": "7162603b2ce3cb979572af69941bf8cdbc061920db8a880f6e5b247f517071a4"
+  },
+  "superseded_draft": "candidate-foxess-read-only-capability-integration-spec-20260905T160144085Z.md (preserved preliminary draft; r02 is the designated review candidate after provenance validation)"
+}

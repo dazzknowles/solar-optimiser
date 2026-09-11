@@ -1,0 +1,49 @@
+{
+  "source_url": "https://www.foxesscloud.com/public/i18n/en/OpenApiDocument.html",
+  "retrieved_at_utc": "2026-09-05T15:56:34.2682286Z",
+  "status_code": 200,
+  "headers": {
+    "Server": [
+      "Tengine"
+    ],
+    "Transfer-Encoding": [
+      "chunked"
+    ],
+    "Connection": [
+      "keep-alive"
+    ],
+    "Date": [
+      "Sat, 05 Sep 2026 15:56:34 GMT"
+    ],
+    "File-Size": [
+      "1774458"
+    ],
+    "Traceid": [
+      "Ignored_Trace"
+    ],
+    "Vary": [
+      "accept-encoding"
+    ],
+    "X-Envoy-Upstream-Service-Time": [
+      "58"
+    ],
+    "Via": [
+      "ens-cache39.l2de4[82,0], ens-cache13.gb9[97,0]"
+    ],
+    "Strict-Transport-Security": [
+      "max-age=31536000"
+    ],
+    "Timing-Allow-Origin": [
+      "*"
+    ],
+    "EagleId": [
+      "a3b5f3a117886237939772468e"
+    ],
+    "Content-Type": [
+      "text/html"
+    ],
+    "Content-Disposition": [
+      "inline; filename=\"OpenApiDocument.html\""
+    ]
+  }
+}
