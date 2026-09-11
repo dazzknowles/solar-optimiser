@@ -1,0 +1,13 @@
+bin
+bin/*
+obj
+obj/*
+.vs
+*.suo
+*.ide
+*.docstates
+*.Publish.xml
+Thumbs.db
+*.user
+*.pubxml
+packages
