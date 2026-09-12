@@ -1,5 +1,27 @@
 # FoxESS Harness proving work
 
+> **Superseded governance premise — 2026-09-12**
+>
+> This document is retained as historical provenance for an earlier proposal.
+> The proposal that the Rio AI Harness could execute, manage or govern the
+> FoxESS proving work has been superseded. The proving work is independently
+> controlled by Eceni; the Rio AI Harness has no execution, management,
+> evidence-control or governance role. No Rio policy, authority, terminology or
+> decision applies to it.
+>
+> The current non-binding design basis is maintained in the
+> [Eceni governance wiki](https://github.com/dazzknowles/eceni-governance/wiki/FoxESS-Proving-Work-Order-Design-Basis).
+> It treats r04 as the immutable authoritative starting specification, separates
+> Work Order authority from any test-specific credential grant, and requires
+> captured/non-live work before separately authorised read-only live testing.
+> Nothing below is current authority for execution.
+
+## Historical content — non-operative
+
+The text below is preserved unchanged to show what was proposed and why the
+later Eceni decision was necessary. References to Harness authority, ownership,
+execution or gates must not be followed for current SolarOro/FoxESS work.
+
 | Field | Value |
 |---|---|
 | Status | Draft project-specific proving-work definition |
