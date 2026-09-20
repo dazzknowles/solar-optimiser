@@ -1,0 +1,34 @@
+name: Build and Test
+
+on:
+  push:
+    branches:
+      - "main"
+
+  pull_request:
+    branches:
+      - "main"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v5
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore dependencies
+        env:
+          ECENI_NUGET_PAT: ${{ secrets.ECENI_NUGET_PAT }}
+        run: dotnet restore
+      - name: Build
+        run: dotnet build --no-restore
+      # Persistence.Tests/Host.Tests are integration-style (require a live MariaDB) and are excluded here;
+      # Domain/Providers.FoxESS/Collection tests have no external dependency and run in CI.
+      - name: Test
+        run: |
+          dotnet test tests/SolarOptimiser.Domain.Tests --no-build --verbosity normal
+          dotnet test tests/SolarOptimiser.Providers.FoxESS.Tests --no-build --verbosity normal
+          dotnet test tests/SolarOptimiser.Collection.Tests --no-build --verbosity normal
