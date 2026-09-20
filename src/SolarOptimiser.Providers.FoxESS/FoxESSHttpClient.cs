@@ -2,6 +2,7 @@ using Microsoft.Extensions.Options;
 using SolarOptimiser.Providers.FoxESS.Contracts;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 
 namespace SolarOptimiser.Providers.FoxESS
 {
@@ -96,17 +97,27 @@ namespace SolarOptimiser.Providers.FoxESS
                     string rawResponseSanitized = Redact(rawResponseText, _options.ApiKey, signature);
 
                     TResponse? parsed;
-                    bool parseFailed = false;
-                    try
+                    bool parseFailed;
+                    if (string.IsNullOrWhiteSpace(rawResponseText))
                     {
-                        parsed = string.IsNullOrWhiteSpace(rawResponseText)
-                            ? null
-                            : JsonSerializer.Deserialize<TResponse>(rawResponseText);
-                    }
-                    catch (JsonException)
-                    {
+                        // An empty body carries no errno to classify against - it must not be mistaken for
+                        // success just because Parsed ends up null (ClassifyOutcome treats a null errno as
+                        // success by default).
                         parsed = null;
                         parseFailed = true;
+                    }
+                    else
+                    {
+                        try
+                        {
+                            parsed = JsonSerializer.Deserialize<TResponse>(rawResponseText);
+                            parseFailed = parsed == null;
+                        }
+                        catch (JsonException)
+                        {
+                            parsed = null;
+                            parseFailed = true;
+                        }
                     }
 
                     return new FoxESSApiCallResult<TResponse>
@@ -121,6 +132,15 @@ namespace SolarOptimiser.Providers.FoxESS
             }
         }
 
+        // r04 §6.8's own data-minimisation list: plant address, user, and installer fields are not required and
+        // must be stripped from retained evidence even though device/list and device/real/query (the only two
+        // endpoints this adapter calls) are not documented to return them - SOL-T-503 requires this beyond
+        // credential redaction, not only in place of it, so it applies regardless of which fields a given
+        // response actually carries.
+        private static readonly Regex SensitiveFieldPattern = new Regex(
+            "\"(address|plantAddress|user|userName|installer|installerName)\"\\s*:\\s*\"(?:[^\"\\\\]|\\\\.)*\"",
+            RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static string Redact(string text, string apiKey, string signature)
         {
             string redacted = text;
@@ -134,6 +154,8 @@ namespace SolarOptimiser.Providers.FoxESS
             {
                 redacted = redacted.Replace(signature, "[REDACTED-SIGNATURE]");
             }
+
+            redacted = SensitiveFieldPattern.Replace(redacted, "\"$1\":\"[REDACTED]\"");
 
             return redacted;
         }

@@ -21,6 +21,7 @@ namespace SolarOptimiser.Collection
         private readonly IDeviceCapabilityRepository _deviceCapabilityRepository;
         private readonly ICollectionRunRepository _collectionRunRepository;
         private readonly ICaptureRepository _captureRepository;
+        private readonly IEvidenceWriter _evidenceWriter;
         private readonly IOptions<CollectionOptions> _options;
 
         public CollectionRunner(
@@ -30,6 +31,7 @@ namespace SolarOptimiser.Collection
             IDeviceCapabilityRepository deviceCapabilityRepository,
             ICollectionRunRepository collectionRunRepository,
             ICaptureRepository captureRepository,
+            IEvidenceWriter evidenceWriter,
             IOptions<CollectionOptions> options)
         {
             _telemetryProvider = telemetryProvider;
@@ -38,6 +40,7 @@ namespace SolarOptimiser.Collection
             _deviceCapabilityRepository = deviceCapabilityRepository;
             _collectionRunRepository = collectionRunRepository;
             _captureRepository = captureRepository;
+            _evidenceWriter = evidenceWriter;
             _options = options;
         }
 
@@ -55,14 +58,19 @@ namespace SolarOptimiser.Collection
             foreach (string providerSiteId in _options.Value.ProviderSiteIDs)
             {
                 ProviderDiscoveryResult discovery = await _telemetryProvider.DiscoverDevicesAsync(providerSiteId, cancellationToken);
+                DateTime discoveryCheckedAtUtc = DateTime.UtcNow;
+
+                string discoveryEvidenceId = Guid.NewGuid().ToString("n");
+                string? statusRequestPath = await _evidenceWriter.WriteAsync(discoveryEvidenceId, "request", discovery.RequestSanitized, discoveryCheckedAtUtc, cancellationToken);
+                string? statusResponsePath = await _evidenceWriter.WriteAsync(discoveryEvidenceId, "response", discovery.RawResponseSanitized, discoveryCheckedAtUtc, cancellationToken);
 
                 lastStatusEvidence = new CollectionRunStatusEvidence(
-                    DateTime.UtcNow,
+                    discoveryCheckedAtUtc,
                     discovery.HTTPStatus,
                     discovery.ProviderErrorNumber,
                     discovery.ProviderMessage,
-                    null,
-                    null);
+                    statusRequestPath,
+                    statusResponsePath);
 
                 bool discoverySucceeded = discovery.Outcome == ProviderOutcome.Success && discovery.Devices != null;
 
@@ -220,6 +228,10 @@ namespace SolarOptimiser.Collection
                 await _deviceRepository.UpdateLastAlertedOutcomeAsync(device.ID, outcome, cancellationToken);
             }
 
+            string attemptEvidenceId = Guid.NewGuid().ToString("n");
+            string? requestPath = await _evidenceWriter.WriteAsync(attemptEvidenceId, "request", callResult.RequestSanitized, requestedAtUtc, cancellationToken);
+            string? rawResponsePath = await _evidenceWriter.WriteAsync(attemptEvidenceId, "response", callResult.RawResponseSanitized, requestedAtUtc, cancellationToken);
+
             CollectionAttemptRecord attempt = new CollectionAttemptRecord(
                 collectionRunId,
                 device.ID,
@@ -232,8 +244,8 @@ namespace SolarOptimiser.Collection
                 callResult.ProviderMessage,
                 null,
                 callResult.ReturnedVariables != null ? string.Join(",", callResult.ReturnedVariables) : null,
-                null,
-                null,
+                requestPath,
+                rawResponsePath,
                 sentryEventId);
 
             await _captureRepository.RecordCaptureAsync(attempt, observations, cancellationToken);
@@ -379,12 +391,18 @@ namespace SolarOptimiser.Collection
                 SentryLevel level = isRecovery ? SentryLevel.Info : SentryLevel.Error;
 
                 SentryId sentryId = SentrySdk.CaptureMessage(message, level);
+                if (sentryId == SentryId.Empty)
+                {
+                    // No DSN configured (or the SDK was never initialised) - nothing was actually delivered, so
+                    // this must not be treated as "attempted": LastAlertedOutcome staying stale means a DSN
+                    // added later still alerts on the current ongoing state instead of silently having already
+                    // "used up" the transition (SOL-T-904).
+                    return (false, null);
+                }
+
                 // SentryId has no ToString("n") overload (unlike Guid) - strip the dashes from the default
-                // dashed form to get the 32-character no-dash form Sentry's own UI/API use. SentryId.Empty
-                // (no DSN configured - SOL-T-904) still counts as "attempted": the alert decision itself was
-                // made and should be tracked, only a genuine SDK failure (below) must not be.
-                string? sentryEventId = sentryId == SentryId.Empty ? null : sentryId.ToString().Replace("-", string.Empty);
-                return (true, sentryEventId);
+                // dashed form to get the 32-character no-dash form Sentry's own UI/API use.
+                return (true, sentryId.ToString().Replace("-", string.Empty));
             }
             catch (Exception)
             {

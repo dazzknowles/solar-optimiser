@@ -53,6 +53,7 @@ namespace SolarOptimiser.Providers.FoxESS.Contracts
         public string? Name { get; set; }
 
         [JsonPropertyName("value")]
+        [JsonConverter(typeof(LenientDecimalConverter))]
         public decimal? Value { get; set; }
     }
 }

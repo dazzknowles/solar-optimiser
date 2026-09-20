@@ -8,6 +8,7 @@ namespace SolarOptimiser.Collection
         public static IServiceCollection AddSolarOptimiserCollection(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<CollectionOptions>(configuration.GetSection("CollectionOptions"));
+            services.AddSingleton<IEvidenceWriter, EvidenceWriter>();
             services.AddSingleton<ICollectionRunner, CollectionRunner>();
 
             return services;

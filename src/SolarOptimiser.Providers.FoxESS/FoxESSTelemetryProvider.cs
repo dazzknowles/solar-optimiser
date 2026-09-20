@@ -119,19 +119,12 @@ namespace SolarOptimiser.Providers.FoxESS
                 snapshot);
         }
 
+        // FoxESS's own status codes (r04 §4.2: 1 online, 2 fault, 3 offline) are preserved verbatim rather than
+        // translated to a label - SOL-T-601's trust gate compares this value literally against "1", and
+        // SOL-T-301 preserves provider identity/state exactly as reported rather than reinterpreting it.
         private static string MapDeviceStatus(int status)
         {
-            switch (status)
-            {
-                case 1:
-                    return "Online";
-                case 2:
-                    return "Fault";
-                case 3:
-                    return "Offline";
-                default:
-                    return "Unknown";
-            }
+            return status.ToString(CultureInfo.InvariantCulture);
         }
 
         private static string? ExtractChannel(string variable)
