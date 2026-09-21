@@ -31,7 +31,7 @@ namespace SolarOptimiser.Providers.FoxESS
 
         public async Task<FoxESSApiCallResult<FoxESSDeviceListResponse>> GetDeviceListAsync(CancellationToken cancellationToken)
         {
-            return await SendAsync<object?, FoxESSDeviceListResponse>("/op/v0/device/list", null, cancellationToken);
+            return await SendAsync<FoxESSDeviceListRequest, FoxESSDeviceListResponse>("/op/v0/device/list", new FoxESSDeviceListRequest(), cancellationToken);
         }
 
         public async Task<FoxESSApiCallResult<FoxESSDeviceRealQueryResponse>> GetDeviceRealQueryAsync(string deviceSN, CancellationToken cancellationToken)

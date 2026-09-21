@@ -3,6 +3,19 @@ using System.Text.Json.Serialization;
 namespace SolarOptimiser.Providers.FoxESS.Contracts
 {
     /// <summary>
+    /// <c>POST /op/v0/device/list</c> request body (r04 §6.6): FoxESS rejects a request with no body, and
+    /// paginates results - this adapter assumes a residential account's device count fits in one page.
+    /// </summary>
+    public sealed class FoxESSDeviceListRequest
+    {
+        [JsonPropertyName("currentPage")]
+        public int CurrentPage { get; set; } = 1;
+
+        [JsonPropertyName("pageSize")]
+        public int PageSize { get; set; } = 500;
+    }
+
+    /// <summary>
     /// <c>POST /op/v0/device/list</c> raw response shape (r04 §4.2). FoxESS's captured documentation gives the
     /// field list in prose, not a JSON schema, so the envelope (<c>errno</c>/<c>result</c>) and exact station
     /// field names here are a best-effort reconstruction pending tenant-zero verification.

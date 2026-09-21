@@ -1,6 +1,6 @@
 -- SOL-T-401: Solar Optimiser Phase 1 MariaDB schema.
 
-CREATE TABLE Sites (
+CREATE TABLE IF NOT EXISTS Sites (
   ID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   ProviderKey VARCHAR(32) NOT NULL,
   ProviderSiteID VARCHAR(64) NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE Sites (
   UNIQUE KEY UQ_Sites_Provider (ProviderKey, ProviderSiteID)
 );
 
-CREATE TABLE Devices (
+CREATE TABLE IF NOT EXISTS Devices (
   ID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   SiteID BIGINT UNSIGNED NOT NULL,
   ProviderDeviceID VARCHAR(64) NOT NULL,
@@ -27,7 +27,7 @@ CREATE TABLE Devices (
   CONSTRAINT FK_Devices_Site FOREIGN KEY (SiteID) REFERENCES Sites(ID)
 );
 
-CREATE TABLE DeviceCapabilities (
+CREATE TABLE IF NOT EXISTS DeviceCapabilities (
   ID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   DeviceID BIGINT UNSIGNED NOT NULL,
   SourceVariable VARCHAR(64) NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE DeviceCapabilities (
   CONSTRAINT FK_DeviceCapabilities_Device FOREIGN KEY (DeviceID) REFERENCES Devices(ID)
 );
 
-CREATE TABLE DeviceBatteries (
+CREATE TABLE IF NOT EXISTS DeviceBatteries (
   ID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   DeviceID BIGINT UNSIGNED NOT NULL,
   BatterySerial VARCHAR(64) NOT NULL,
@@ -54,7 +54,7 @@ CREATE TABLE DeviceBatteries (
   CONSTRAINT FK_DeviceBatteries_Device FOREIGN KEY (DeviceID) REFERENCES Devices(ID)
 );
 
-CREATE TABLE CollectionRuns (
+CREATE TABLE IF NOT EXISTS CollectionRuns (
   ID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   StartedAtUTC DATETIME(3) NOT NULL,
   CompletedAtUTC DATETIME(3) NULL,
@@ -70,7 +70,7 @@ CREATE TABLE CollectionRuns (
   StatusResponsePath VARCHAR(260) NULL
 );
 
-CREATE TABLE CollectionAttempts (
+CREATE TABLE IF NOT EXISTS CollectionAttempts (
   ID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   CollectionRunID BIGINT UNSIGNED NOT NULL,
   DeviceID BIGINT UNSIGNED NOT NULL,
@@ -91,7 +91,7 @@ CREATE TABLE CollectionAttempts (
   KEY IX_CollectionAttempts_DeviceTime (DeviceID, RequestedAtUTC DESC)
 );
 
-CREATE TABLE TelemetryObservations (
+CREATE TABLE IF NOT EXISTS TelemetryObservations (
   ID BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   CaptureID BIGINT UNSIGNED NOT NULL, -- device is derived via CaptureID -> CollectionAttempts.DeviceID; never stored here directly
   Quantity VARCHAR(32) NOT NULL,

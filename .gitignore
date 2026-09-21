@@ -11,3 +11,6 @@ Thumbs.db
 *.user
 *.pubxml
 packages
+.env
+.idea
+src/SolarOptimiser.Host/evidence

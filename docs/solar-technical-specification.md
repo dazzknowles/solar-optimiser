@@ -92,7 +92,7 @@ Technical requirements/design decisions use stable IDs `SOL-T-<NNN>`, grouped by
 
   `ProviderDiscoveryResult` and `ProviderCallResult` deliberately mirror each other's shape: `device/list` (discovery/status) and `device/real/query` (telemetry) are two distinct provider calls with independent evidence, and neither is allowed to overwrite or be conflated with the other (see SOL-T-401/SOL-T-402).
 
-- **SOL-T-202** *(implements SOL-F-101, SOL-F-801)*: `SolarOptimiser.Providers.FoxESS` implements this contract using the r04 §6.6 allow-listed endpoints needed for Phase 1 (`plant/list`, `device/list`, `device/detail`, `device/variable/get`, `device/real/query`), against `developer-eu.foxesscloud.com` (the EU OpenPlatform host, confirmed for tenant zero), using the **private API token** authentication mechanism (MD5 signature per r04 §4.1, confirmed for tenant zero). No generic/pass-through HTTP client is exposed to `Collection`.
+- **SOL-T-202** *(implements SOL-F-101, SOL-F-801)*: `SolarOptimiser.Providers.FoxESS` implements this contract using the r04 §6.6 allow-listed endpoints needed for Phase 1 (`plant/list`, `device/list`, `device/detail`, `device/variable/get`, `device/real/query`), against `www.foxesscloud.com` (the documented OpenAPI request domain, r04 §2; confirmed for tenant zero 2026-09-21 — `developer-eu.foxesscloud.com` is the developer portal's web UI, not the API host, and rejects real API calls with a 405), using the **private API token** authentication mechanism (MD5 signature per r04 §4.1, confirmed for tenant zero). No generic/pass-through HTTP client is exposed to `Collection`.
 - **SOL-T-203** *(implements SOL-F-102)*: `GetLatestTelemetryAsync` omits FoxESS's `variables` parameter on every call (requests every variable the device currently exposes) — there is no documented quota difference between requesting a subset and requesting everything (limits are per call, not per variable), and this is what makes continuous capability discovery possible without a separate discovery-only call (see SOL-T-302).
 
 ## 4. Domain model and identity persistence (SOL-T-3xx)
@@ -288,7 +288,7 @@ Technical requirements/design decisions use stable IDs `SOL-T-<NNN>`, grouped by
 
 ## 13. Configuration and secrets (SOL-T-12xx)
 
-- **SOL-T-1201**: `FoxESSProviderOptions` (`BaseUrl` = `https://developer-eu.foxesscloud.com`, `ApiKey`, `SiteProviderIDs`); `CollectionOptions` (`PollInterval`, `RequestTimeoutSeconds`, `RetryDelay`, `PerPollBudget`, `MaxCapturedEvidenceBytes`); `SentryOptions` (`SentryDsn`); `HostOptions` (`AllowedCIDRRanges`, `RawResponseRoot`); `ConnectionStrings:SolarOptimiser`. Local development uses .NET user-secrets; production secrets are a local, non-committed configuration file (the deployment target is a local device, not a hosted secrets manager — revisit if/when Solar moves to a hosted environment).
+- **SOL-T-1201**: `FoxESSProviderOptions` (`BaseUrl` = `https://www.foxesscloud.com`, `ApiKey`, `SiteProviderIDs`); `CollectionOptions` (`PollInterval`, `RequestTimeoutSeconds`, `RetryDelay`, `PerPollBudget`, `MaxCapturedEvidenceBytes`); `SentryOptions` (`SentryDsn`); `HostOptions` (`AllowedCIDRRanges`, `RawResponseRoot`); `ConnectionStrings:SolarOptimiser`. Local development uses .NET user-secrets; production secrets are a local, non-committed configuration file (the deployment target is a local device, not a hosted secrets manager — revisit if/when Solar moves to a hosted environment).
 
 ## 14. Data-access technology and naming conventions (SOL-T-13xx)
 
