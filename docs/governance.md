@@ -1,6 +1,6 @@
 # Solar Optimiser governance adoption
 
-This file records which Eceni Governance baseline governs Solar Optimiser. It does not copy or redefine portfolio Governance. The authoritative source is the [Eceni Governance repository](https://github.com/dazzknowles/eceni-governance); Solar currently adopts [baseline 1.1.0 at commit `90e8b0a`](https://github.com/dazzknowles/eceni-governance/tree/90e8b0a7e051df4e40e058223c7d3aad6b88c166).
+This file records which Eceni Governance baseline governs Solar Optimiser. It does not copy or redefine portfolio Governance. The authoritative source is the [Eceni Governance repository](https://github.com/dazzknowles/eceni-governance); Solar currently adopts [baseline 1.2.0 at commit `fba2357`](https://github.com/dazzknowles/eceni-governance/tree/fba2357d6876efa051eddac42f7592e4e5dc66a5).
 
 Solar requirements, design decisions, exceptions and implementation evidence remain Solar-owned project records. If this file conflicts with the adopted baseline, the baseline governs and the conflict must be resolved rather than silently reinterpreted here.
 
@@ -11,7 +11,8 @@ Solar was created before Eceni had a versioned Governance baseline. It therefore
 | Effective date | Born/current/adopted baseline | Transition decision | Migration state |
 |---|---|---|---|
 | Project creation to 23 September 2026 | None | No versioned Eceni Governance baseline then existed | Historical state; not a claim that Solar was ungoverned or retrospectively conformant |
-| 24 September 2026 | 1.1.0 (first adopted and current) | [Solar adoption pull request #8](https://github.com/dazzknowles/solar-optimiser/pull/8) | Adopted with the explicit outstanding work below; no blanket conformance claim |
+| 24 September 2026 | 1.1.0 (first adopted) | [Solar adoption pull request #8](https://github.com/dazzknowles/solar-optimiser/pull/8) | Adopted with the explicit outstanding work below; no blanket conformance claim |
+| 24 September 2026 | 1.2.0 (current) | [Solar adoption pull request #9](https://github.com/dazzknowles/solar-optimiser/pull/9) | QUA-002 adopts C#/.NET and MariaDB as the existing Solar technology defaults; no implementation migration is required |
 
 Every future transition must add a row rather than replace this history, link its decision, and record applicability changes, exceptions and migration work.
 
@@ -19,7 +20,7 @@ Every future transition must add a row rather than replace this history, link it
 
 ### Commandments
 
-All six [Commandments at baseline 1.1.0](https://github.com/dazzknowles/eceni-governance/blob/90e8b0a7e051df4e40e058223c7d3aad6b88c166/COMMANDMENTS.md) apply to all Solar product and engineering work:
+All six [Commandments at baseline 1.2.0](https://github.com/dazzknowles/eceni-governance/blob/fba2357d6876efa051eddac42f7592e4e5dc66a5/COMMANDMENTS.md) apply to all Solar product and engineering work:
 
 1. Bounded Autonomy
 2. Data Is Entrusted
@@ -32,11 +33,11 @@ None is currently classified as not applicable.
 
 ### Laws
 
-The authoritative wording, applicability and exception policy remain in the [1.1.0 Laws](https://github.com/dazzknowles/eceni-governance/blob/90e8b0a7e051df4e40e058223c7d3aad6b88c166/LAWS.md).
+The authoritative wording, applicability and exception policy remain in the [1.2.0 Laws](https://github.com/dazzknowles/eceni-governance/blob/fba2357d6876efa051eddac42f7592e4e5dc66a5/LAWS.md).
 
 | Law | Solar applicability and current evidence state |
 |---|---|
-| EVI-001 — Claim Strength Must Not Exceed Evidence | Applies to specifications, reviews, tests and acceptance. Solar does not claim blanket 1.1.0 conformance. Issue [#4](https://github.com/dazzknowles/solar-optimiser/issues/4) retains the outstanding tenant-zero acceptance evidence. |
+| EVI-001 — Claim Strength Must Not Exceed Evidence | Applies to specifications, reviews, tests and acceptance. Solar does not claim blanket 1.2.0 conformance. Issue [#4](https://github.com/dazzknowles/solar-optimiser/issues/4) retains the outstanding tenant-zero acceptance evidence. |
 | EVI-002 — Evidence Timing Must Be Proportionate | Applies where operation is the proportionate evidence-producing mechanism. The r04a/r04b decisions and issue #4 record the existing deferral and its trigger. |
 | GOV-001 — Departures Follow a Governed Lifecycle | Applies to the approved specifications, addenda, product decisions and acceptance criteria. Solar-specific departures and obligations stay in Solar records. |
 | GOV-002 — Decisions Remain Valid Only While Their Basis Holds | Applies to provider capabilities, operating assumptions and other consequential decisions with changeable bases. Their triggers belong with the relevant Solar decision. |
@@ -47,12 +48,13 @@ The authoritative wording, applicability and exception policy remain in the [1.1
 | DATA-002 — Required System Data Is Reconstructible | Applies to Solar system/reference data. Database definitions and the FoxESS mapping catalogue are versioned, but automated clean-bootstrap evidence remains outstanding in issue [#7](https://github.com/dazzknowles/solar-optimiser/issues/7). Environment-specific telemetry and provider state are operational data, not reference data made safe for source control by this Law. |
 | ECO-001 — Prefer Bounded Cost to Recurring Waste | Not currently triggered: Phase 1 has no material recurring infrastructure, inference, service or data-transfer cost decision. Apply and record it when such a decision arises, including a reassessment trigger where its basis can change. |
 | QUA-001 — Follow the Applicable Implementation Guide | Applies to the C# and MariaDB artefacts identified below. Known database gaps are tracked by issue #7; adoption is not evidence that all existing implementation already conforms. |
+| QUA-002 — Technology Foundations Require Explicit Authority | Applies. C#/.NET and MariaDB are adopted as Solar's existing technology defaults. Any durable language, runtime, framework, database, deployment platform or external-service dependency outside those defaults requires an authoritative requirement or design-authority decision before implementation. |
 
 ECO-001 is the only Law currently recorded as not applicable. That classification is about Solar's present decisions, not a project exemption from future use of the Law.
 
 ### Checks
 
-The [1.1.0 Check catalogue](https://github.com/dazzknowles/eceni-governance/blob/90e8b0a7e051df4e40e058223c7d3aad6b88c166/CHECKS.md) describes objective enforcement, not the source of the rules.
+The [1.2.0 Check catalogue](https://github.com/dazzknowles/eceni-governance/blob/fba2357d6876efa051eddac42f7592e4e5dc66a5/CHECKS.md) describes objective enforcement, not the source of the rules.
 
 | Check | Solar applicability and implementation state |
 |---|---|
@@ -62,8 +64,8 @@ The [1.1.0 Check catalogue](https://github.com/dazzknowles/eceni-governance/blob
 
 ### Implementation guides
 
-- The [C# implementation guide 1.0.0](https://github.com/dazzknowles/eceni-governance/blob/90e8b0a7e051df4e40e058223c7d3aad6b88c166/guides/CSHARP.md) applies to all hand-authored C# source and tests in `src/` and `tests/`. No generated C# is currently committed and therefore no generated-code non-applicability is needed. Existing code is not declared fully conformant merely by adopting the guide.
-- The [MariaDB implementation guide 1.0.0](https://github.com/dazzknowles/eceni-governance/blob/90e8b0a7e051df4e40e058223c7d3aad6b88c166/guides/MARIADB.md) applies to the schema and stored procedures under `src/SolarOptimiser.Persistence/Database/`. The missing explicit `SQL SECURITY INVOKER` declarations and Check evidence are tracked by issue #7.
+- The [C# implementation guide 1.0.0](https://github.com/dazzknowles/eceni-governance/blob/fba2357d6876efa051eddac42f7592e4e5dc66a5/guides/CSHARP.md) applies to all hand-authored C# source and tests in `src/` and `tests/`. No generated C# is currently committed and therefore no generated-code non-applicability is needed. Existing code is not declared fully conformant merely by adopting the guide.
+- The [MariaDB implementation guide 1.0.0](https://github.com/dazzknowles/eceni-governance/blob/fba2357d6876efa051eddac42f7592e4e5dc66a5/guides/MARIADB.md) applies to the schema and stored procedures under `src/SolarOptimiser.Persistence/Database/`. The missing explicit `SQL SECURITY INVOKER` declarations and Check evidence are tracked by issue #7.
 
 ## Project-specific application: FoxESS collection scope
 
