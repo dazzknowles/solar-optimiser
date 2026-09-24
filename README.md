@@ -4,6 +4,10 @@ Phase 1 read-only telemetry capture and retrieval for a FoxESS solar/battery ins
 `docs/solar-functional-specification.md` and `docs/solar-technical-specification.md` for the authoritative
 requirements this implementation follows.
 
+Solar formally adopts [Eceni Governance 1.1.0](docs/governance.md). The adoption record identifies the
+applicable portfolio rules, Solar-specific decisions and outstanding conformance work without copying Governance
+into this repository.
+
 ## Solution layout (SOL-T-101)
 
 ```
