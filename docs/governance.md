@@ -12,7 +12,7 @@ Solar was created before Eceni had a versioned Governance baseline. It therefore
 |---|---|---|---|
 | Project creation to 23 September 2026 | None | No versioned Eceni Governance baseline then existed | Historical state; not a claim that Solar was ungoverned or retrospectively conformant |
 | 24 September 2026 | 1.1.0 (first adopted) | [Solar adoption pull request #8](https://github.com/dazzknowles/solar-optimiser/pull/8) | Adopted with the explicit outstanding work below; no blanket conformance claim |
-| 24 September 2026 | 1.2.0 (current) | This adoption change | QUA-002 adopts C#/.NET and MariaDB as the existing Solar technology defaults; no implementation migration is required |
+| 24 September 2026 | 1.2.0 (current) | [Solar adoption pull request #9](https://github.com/dazzknowles/solar-optimiser/pull/9) | QUA-002 adopts C#/.NET and MariaDB as the existing Solar technology defaults; no implementation migration is required |
 
 Every future transition must add a row rather than replace this history, link its decision, and record applicability changes, exceptions and migration work.
 
