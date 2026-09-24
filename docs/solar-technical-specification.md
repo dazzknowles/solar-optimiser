@@ -1,6 +1,8 @@
 # Solar Optimiser — Technical Specification
 
-Status: **Living specification.** This is the authoritative technical specification for the whole Solar Optimiser system. Phase 1 content in this revision realises the Functional Specification's Phase 1 requirements (`docs/solar-functional-specification.md`), as designed and independently reviewed in [issue #3](https://github.com/dazzknowles/solar-optimiser/issues/3) (proposals v1–v7, five rounds of independent adversarial review by Codex). It records approved outcomes only — issue #3 remains the design workshop and evidence trail for how these decisions were reached, including alternatives that were considered and rejected.
+Status: **Living specification.** This is the authoritative technical specification for the whole Solar Optimiser system. Phase 1 content in this revision realises the Functional Specification's Phase 1 requirements (`docs/solar-functional-specification.md`), as designed and independently reviewed in [issue #3](https://github.com/dazzknowles/solar-optimiser/issues/3) (proposals v1–v7, five rounds of independent adversarial review by Codex). It records approved outcomes only — issue #3 remains the design workshop and evidence trail for how those decisions were reached, and [issue #5](https://github.com/dazzknowles/solar-optimiser/issues/5) records the later product-owner decision on FoxESS site discovery and collection scope.
+
+**Implementation-status notice:** SOL-T-204–SOL-T-211 below are approved acceptance requirements from issue #5 but are not implemented at the time of this revision. The current implementation still loops over manually configured `ProviderSiteIDs` and can retain the account-wide `device/list` response as raw evidence. Recording the approved target must not be represented as implementation or conformance evidence.
 
 ## 1. Alignment and scope
 
@@ -94,6 +96,14 @@ Technical requirements/design decisions use stable IDs `SOL-T-<NNN>`, grouped by
 
 - **SOL-T-202** *(implements SOL-F-101, SOL-F-801)*: `SolarOptimiser.Providers.FoxESS` implements this contract using the r04 §6.6 allow-listed endpoints needed for Phase 1 (`plant/list`, `device/list`, `device/detail`, `device/variable/get`, `device/real/query`), against `www.foxesscloud.com` (the documented OpenAPI request domain, r04 §2; confirmed for tenant zero 2026-09-21 — `developer-eu.foxesscloud.com` is the developer portal's web UI, not the API host, and rejects real API calls with a 405), using the **private API token** authentication mechanism (MD5 signature per r04 §4.1, confirmed for tenant zero). No generic/pass-through HTTP client is exposed to `Collection`.
 - **SOL-T-203** *(implements SOL-F-102)*: `GetLatestTelemetryAsync` omits FoxESS's `variables` parameter on every call (requests every variable the device currently exposes) — there is no documented quota difference between requesting a subset and requesting everything (limits are per call, not per variable), and this is what makes continuous capability discovery possible without a separate discovery-only call (see SOL-T-302).
+- **SOL-T-204** *(approved, not implemented; implements SOL-F-105, SOL-F-106)*: Provider inventory discovery and telemetry collection are separate capabilities. A bounded onboarding/refresh operation may enumerate every site visible to the FoxESS connection, but the recurring collector receives only an explicit approved-site set. Empty means collect nothing; it never means all sites. Supplying a key, discovering exactly one site, or previously approving another site shall not create implicit approval.
+- **SOL-T-205** *(approved, not implemented; implements SOL-F-105, SOL-F-207)*: Discovery presents each candidate with the minimum useful identity — provider site ID and, where already returned by the chosen allow-listed operation, display name and timezone — and a state that distinguishes at least `Pending` from `Approved`. The discovery operation shall not call a telemetry endpoint.
+- **SOL-T-206** *(approved, not implemented; implements SOL-F-106, SOL-F-107, SOL-F-108)*: The approved-site filter is applied before any per-device telemetry call or site/device/capability/telemetry operational write. Approval covers every inverter-class device at the approved site. Revocation takes effect before the next poll and does not imply deletion of already retained telemetry.
+- **SOL-T-207** *(approved, not implemented; implements SOL-F-804)*: An account-wide FoxESS inventory response is processed as transient provider input. Before durable evidence, logging, alerting or diagnostics, it is reduced to approved-site content or to the minimum separately justified candidate metadata of SOL-T-205. A raw account-wide response containing non-approved site/device identifiers shall not be written to disk.
+- **SOL-T-208** *(approved, not implemented; implements SOL-F-805)*: Approval is scoped to the FoxESS provider connection/account context as well as `ProviderSiteID`. Credential replacement, account reassignment or newly expanded visibility fails closed: approval is not inherited without an evidenced stable-identity match and an explicit migration rule.
+- **SOL-T-209** *(approved, not implemented; supports SOL-F-103, SOL-F-704)*: A required account inventory/status refresh is made once per cycle or onboarding action and then partitioned locally; it is not repeated once per approved site. Pagination continues until the provider-reported inventory is complete, and Solar shall not claim completeness from the current page-size-500 request alone.
+- **SOL-T-210** *(approved migration rule, not implemented)*: Every non-empty legacy `FOXESS_SITE_PROVIDER_IDS` / `CollectionOptions.ProviderSiteIDs` entry migrates as an explicit approval for the existing FoxESS connection, without duplicating sites or observations. An empty legacy list migrates to no approvals, not approval of every discovered site.
+- **SOL-T-211** *(approved product rationale)*: Tenant zero currently exposes one site, so SOL-T-204 adds one conscious onboarding selection without changing the intended collection result. This discipline is intentionally retained because a future installer or delegated key may expose many customer sites; making each customer/site addition explicit is both a data boundary and useful fleet-administration hygiene. This is a Solar product/security decision under issue #5, informed by SEC-001, DATA-001, EVI-001, VER-001 and QUA-001 in Eceni Governance baseline 1.1.0 (commit `90e8b0a`), not a Governance-policy extension.
 
 ## 4. Domain model and identity persistence (SOL-T-3xx)
 
@@ -225,8 +235,8 @@ Technical requirements/design decisions use stable IDs `SOL-T-<NNN>`, grouped by
 
 ## 6. Capture, provenance and evidence handling (SOL-T-5xx)
 
-- **SOL-T-501** *(implements SOL-F-701, SOL-F-702)*: `Collection`'s poll loop, per run: (1) calls `DiscoverDevicesAsync` once — one `device/list` call covers every device at the site — recording its own evidence on `CollectionRuns.Status*` and refreshing `Devices.Status`/`ModuleSerial`; (2) for each device, calls `GetLatestTelemetryAsync`, recording per-device evidence on its own `CollectionAttempts` row. The two calls' evidence never share or overwrite each other's fields.
-- **SOL-T-502** *(implements SOL-F-701, SOL-F-803)*: All request/response evidence is written to disk, not the database — `<RawResponseRoot>/yyyy/MM/dd/<CaptureID>-request.json` / `-response.json` (and the equivalent for the run-level status call), via a temp-file-then-atomic-rename, with the owning DB row's path columns committed only after the rename succeeds. If the file write/rename fails for any reason, the path column simply stays null — writing evidence is best-effort and secondary, and never blocks or rolls back the primary `CollectionAttempts`/`TelemetryObservations` write. Each file is capped at a configured maximum size (default 1MB); an oversized body is not written, and the path stays null.
+- **SOL-T-501** *(implements SOL-F-701, SOL-F-702; site-scoping superseded by approved SOL-T-204–SOL-T-209)*: `Collection`'s poll loop, per run: (1) obtains discovery/status once, recording its own evidence on `CollectionRuns.Status*` and refreshing approved `Devices.Status`/`ModuleSerial`; (2) for each device at an approved site, calls `GetLatestTelemetryAsync`, recording per-device evidence on its own `CollectionAttempts` row. The two calls' evidence never share or overwrite each other's fields. The current implementation repeats account-wide `device/list` once per configured site; SOL-T-209 must replace that behaviour before issue #5 can conform.
+- **SOL-T-502** *(implements SOL-F-701, SOL-F-803, SOL-F-804; issue #5 minimisation not yet implemented)*: Permitted request/response evidence is written to disk, not the database — `<RawResponseRoot>/yyyy/MM/dd/<CaptureID>-request.json` / `-response.json` (and the equivalent for the run-level status call), via a temp-file-then-atomic-rename, with the owning DB row's path columns committed only after the rename succeeds. If the file write/rename fails for any reason, the path column simply stays null — writing evidence is best-effort and secondary, and never blocks or rolls back the primary `CollectionAttempts`/`TelemetryObservations` write. Each file is capped at a configured maximum size (default 1MB); an oversized body is not written, and the path stays null. Account-wide inventory content is additionally subject to SOL-T-207 and is not permitted evidence merely because the provider returned it.
 - **SOL-T-503** *(implements SOL-F-803)*: Redaction before writing is deterministic, not heuristic: the FoxESS API key and its derived request signature (both known, fixed values) are removed by exact string replacement, and a small fixed field allow-list additionally strips plant address, user and installer fields if a `device/list`/`device/detail` response ever includes them (per r04 §6.8's own list of unnecessary fields) — beyond credential redaction, not only in place of it.
 - **SOL-T-504** *(implements SOL-F-803)*: Sentry never receives request/response content, sanitized or not — only bounded tags (`Outcome`, `DeviceID`, `SiteID`, timestamps) and the local file path as a reference for on-device investigation (see SOL-T-901).
 - **SOL-T-505** *(implements SOL-F-101)*: `Collection` writes a `CollectionAttempts` row and its `TelemetryObservations` rows inside a single database transaction via an explicit local unit of work (SOL-T-1301) — not `System.Transactions`/`TransactionScope`. A whole-attempt failure with nothing to persist writes only the `CollectionAttempts` row (a single statement needs no transaction). This closes completeness gaps from a mid-write crash; it does not, and is not intended to, deduplicate an exact replay of an already-completed acquisition — a future backfill/self-heal capability (not in Phase 1) would need its own idempotency check against existing coverage before writing.
@@ -288,7 +298,7 @@ Technical requirements/design decisions use stable IDs `SOL-T-<NNN>`, grouped by
 
 ## 13. Configuration and secrets (SOL-T-12xx)
 
-- **SOL-T-1201**: `FoxESSProviderOptions` (`BaseUrl` = `https://www.foxesscloud.com`, `ApiKey`, `SiteProviderIDs`); `CollectionOptions` (`PollInterval`, `RequestTimeoutSeconds`, `RetryDelay`, `PerPollBudget`, `MaxCapturedEvidenceBytes`); `SentryOptions` (`SentryDsn`); `HostOptions` (`AllowedCIDRRanges`, `RawResponseRoot`); `ConnectionStrings:SolarOptimiser`. Local development uses .NET user-secrets; production secrets are a local, non-committed configuration file (the deployment target is a local device, not a hosted secrets manager — revisit if/when Solar moves to a hosted environment).
+- **SOL-T-1201**: `FoxESSProviderOptions` (`BaseUrl` = `https://www.foxesscloud.com`, `ApiKey`, and, until SOL-T-210 is implemented, legacy `SiteProviderIDs`); `CollectionOptions` (`PollInterval`, `RequestTimeoutSeconds`, `RetryDelay`, `PerPollBudget`, `MaxCapturedEvidenceBytes`, and legacy `ProviderSiteIDs`); `SentryOptions` (`SentryDsn`); `HostOptions` (`AllowedCIDRRanges`, `RawResponseRoot`); `ConnectionStrings:SolarOptimiser`. Local development uses .NET user-secrets; production secrets are a local, non-committed configuration file (the deployment target is a local device, not a hosted secrets manager — revisit if/when Solar moves to a hosted environment). Under SOL-T-210, non-empty legacy site IDs are migration input denoting explicit approval, not the future discovery mechanism.
 
 ## 14. Data-access technology and naming conventions (SOL-T-13xx)
 
@@ -314,7 +324,8 @@ Technical requirements/design decisions use stable IDs `SOL-T-<NNN>`, grouped by
 - **SOL-T-1403**: Collection — FoxESS-variable-to-`TelemetryQuantity` mapping tests; the trust-gate scenarios (trusted-status additive classification; untrusted-status zero-row suppression); the partial-success scenarios (whole failure → zero rows; full success → all `Ok`; partial → mixed `Ok`/`Missing`); one test per retry-policy category (SOL-T-802); an overlap-prevention test; a rollback/injected-failure test for the unit of work (a deterministic second-command failure must leave neither the attempt nor its observations committed).
 - **SOL-T-1404**: Persistence — integration tests against ephemeral MariaDB proving schema, the ported `DBUtility`'s stored-procedure execution path via the unit of work, and insert performance at the estimated daily volume (SOL-T-403).
 - **SOL-T-1405**: Host — integration tests seeding rows and asserting the ranged/latest/nearest/capture-detail endpoints (SOL-T-1001–1004) return them correctly, including cursor ordering and pagination bounds; a test proving missing/invalid CIDR configuration fails startup (SOL-T-1101).
-- **SOL-T-1406**: Explicitly not included as automated, CI-gating tests: load/performance tests beyond SOL-T-1404's basic volume check, multi-site tests, or any live-FoxESS end-to-end test (live verification happens as part of implementation per r04a/r04b, not as a repeatable test that would consume quota on every run).
+- **SOL-T-1406**: Issue #5's site boundary requires independently derived, CI-gating tests covering: zero/one/many discovered sites; empty, single and multiple approved subsets; all devices at an approved site; newly appearing, disappearing and revoked sites; credential replacement; duplicate IDs; inventories larger than one provider page; one inventory call rather than one per site; legacy migration; and absence of non-approved data from telemetry calls, database writes, evidence files, logs and alerts. These are fixture/integration tests and make no live FoxESS calls.
+- **SOL-T-1407**: Explicitly not included as automated, CI-gating tests: load/performance tests beyond SOL-T-1404's basic volume check, or any live-FoxESS end-to-end test (live verification happens as part of implementation per r04a/r04b, not as a repeatable test that would consume quota on every run). Each issue #5 criterion must receive an EVI-001 result with evidence and assessor provenance; unexercised live behaviour remains `unverified`, not Pass.
 
 ## 16. Deployment and runtime (SOL-T-15xx)
 
@@ -325,8 +336,12 @@ Technical requirements/design decisions use stable IDs `SOL-T-<NNN>`, grouped by
 Per the design review's own governance discipline, this section records what genuinely remains undecided rather than resolving it silently:
 
 - **Quota-validation strictness (SOL-T-804)**: should a startup call-budget estimate that looks likely to exceed FoxESS's documented (ambiguous-scope) daily limit cause `Host` to refuse to start, or only log a warning and proceed? Not decided during design review.
+- **Pending-site metadata lifecycle (issue #5)**: the approved boundary permits only minimum onboarding metadata, but the exact persistence location, retention period and deletion behaviour still require implementation-time design and review.
+- **Approval mechanism and actor identity (issue #5)**: Phase 1 may use retained configuration or a bounded administrative command; a future hosted product will require authenticated tenant/installer authority and an audit identity. The mechanism is not selected here, but it must satisfy SOL-T-204–SOL-T-210.
+- **FoxESS connection identity (issue #5)**: FoxESS evidence does not yet establish a stable account identifier suitable for binding approvals across credential rotation. Until evidenced and designed, replacement fails closed under SOL-T-208.
+- **Inventory endpoint choice (issue #5)**: `plant/list` exposes station name/timezone while `device/list` exposes membership/status. The implementation must choose the minimum call set that satisfies the approved UX, status and quota requirements without widening retained data.
 
-No other consequential ambiguity was identified during this consistency pass; the five rounds of independent review on issue #3 concluded with no further decisions flagged as required before implementation.
+These are implementation questions within the approved boundary, not permission to weaken it. Other Phase 1 decisions remain as concluded by the five rounds of independent review on issue #3.
 
 ## 18. Traceability matrix
 
@@ -347,6 +362,7 @@ No other consequential ambiguity was identified during this consistency pass; th
 | r04 §4.2 (`moduleSN`, `batteryList`) | SOL-F-201, SOL-F-206 | SOL-T-301, SOL-T-303 |
 | r04 §4.4 (rate limits) | SOL-F-704 | SOL-T-802, SOL-T-804 |
 | r04 §6.8 (data minimisation) | SOL-F-803 | SOL-T-503, SOL-T-504 |
+| r04 §4.2 (account-level site/device discovery) and issue #5 | SOL-F-105–108, SOL-F-207, SOL-F-804–805 | SOL-T-204–211, SOL-T-501–503, SOL-T-1201, SOL-T-1406–1407 |
 | r04 §7.6 / r04a (PV-channel mapping deferral) | SOL-F-303 | SOL-T-703 |
 | r04a (ordering supersession) | SOL-F-902 | — (governance decision, not a technical design) |
 | r04b (evidence-completion decoupling) | SOL-F-903 | — (tracked via issue #4, not a technical design) |
@@ -357,12 +373,17 @@ No other consequential ambiguity was identified during this consistency pass; th
 | SOL-F-102 | SOL-T-101, SOL-T-203, SOL-T-401 |
 | SOL-F-103 | SOL-T-801 |
 | SOL-F-104 | SOL-T-101, SOL-T-401, SOL-T-803 |
+| SOL-F-105 | SOL-T-204, SOL-T-205 |
+| SOL-F-106 | SOL-T-204, SOL-T-206 |
+| SOL-F-107 | SOL-T-206 |
+| SOL-F-108 | SOL-T-206 |
 | SOL-F-201 | SOL-T-301, SOL-T-401 |
 | SOL-F-202 | SOL-T-302, SOL-T-401 |
 | SOL-F-203 | SOL-T-302, SOL-T-603 |
 | SOL-F-204 | SOL-T-302, SOL-T-603 |
 | SOL-F-205 | SOL-T-302 |
 | SOL-F-206 | SOL-T-303, SOL-T-401 |
+| SOL-F-207 | SOL-T-205, SOL-T-207 |
 | SOL-F-301 | SOL-T-701 |
 | SOL-F-302 | SOL-T-704 |
 | SOL-F-303 | SOL-T-703 |
@@ -386,6 +407,9 @@ No other consequential ambiguity was identified during this consistency pass; th
 | SOL-F-801 | SOL-T-1102 |
 | SOL-F-802 | SOL-T-1101 |
 | SOL-F-803 | SOL-T-503, SOL-T-504 |
+| SOL-F-804 | SOL-T-207, SOL-T-502, SOL-T-503, SOL-T-504 |
+| SOL-F-805 | SOL-T-208, SOL-T-210 |
 | SOL-F-901 | This matrix |
 | SOL-F-902 | r04a, r04b (governance record; see §17 note) |
 | SOL-F-903 | Issue #4 |
+| SOL-F-904 | Issue #5 and SOL-T-211 |

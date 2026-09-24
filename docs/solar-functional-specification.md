@@ -2,7 +2,7 @@
 
 Status: **Living specification.** This is the authoritative functional specification for the whole Solar Optimiser system. It is not a Phase 1-only document: Phase 1 populates the parts of the system that are currently known, designed and approved; later phases extend the same document with their own requirements as they are designed and approved, using the same ID scheme.
 
-Phase 1 content in this revision was derived from the design and independent review recorded in [issue #3](https://github.com/dazzknowles/solar-optimiser/issues/3) (proposals v1–v7, five rounds of independent adversarial review), and from the approved FoxESS read-only capability evidence in `docs/requirements/foxess/read-only-capability/r04/` (r04, and its addenda r04a and r04b).
+Phase 1 content in this revision was derived from the design and independent review recorded in [issue #3](https://github.com/dazzknowles/solar-optimiser/issues/3) (proposals v1–v7, five rounds of independent adversarial review), from the approved FoxESS read-only capability evidence in `docs/requirements/foxess/read-only-capability/r04/` (r04, and its addenda r04a and r04b), and from the FoxESS site-discovery and collection-boundary decision approved by the product owner in [issue #5](https://github.com/dazzknowles/solar-optimiser/issues/5).
 
 ## 1. Purpose
 
@@ -38,10 +38,14 @@ Each requirement below cites the FoxESS evidence (r04 `SR-*` IDs, or specific r0
 
 ### 4.1 Telemetry acquisition (SOL-F-1xx)
 
-- **SOL-F-101**: Solar shall periodically acquire telemetry from a configured provider (Phase 1: FoxESS) for a configured real site, using only read-only operations — no device, account, schedule or state-changing operation shall ever be performed as part of acquisition. *(Traces to: r04 §1, §6 read-only safety requirements.)*
+- **SOL-F-101**: Solar shall periodically acquire telemetry from a configured provider (Phase 1: FoxESS) only for an explicitly approved real site, using only read-only operations — no device, account, schedule or state-changing operation shall ever be performed as part of acquisition. *(Traces to: r04 §1, §6 read-only safety requirements; issue #5 product-owner decision.)*
 - **SOL-F-102**: Acquisition shall cover every inverter-class device actually present at the site, discovered from the provider rather than assumed to be a fixed count. *(Traces to: SR-ID, SR-CAP; validated against tenant zero's two-inverter topology.)*
 - **SOL-F-103**: The acquisition cadence shall be configurable. r04 does not establish a required raw polling interval (only that "appropriate half-hour resolution" is needed at some aggregation level), so no fixed cadence is a hard functional requirement in Phase 1. *(Traces to: r04 §3 note under the requirements table, §4.4 rate-limit ambiguity.)*
 - **SOL-F-104**: A failure acquiring one device's telemetry shall not prevent acquisition of other devices at the same site in the same cycle.
+- **SOL-F-105**: Solar may use a bounded, read-only provider inventory operation to discover the sites accessible to a configured credential for onboarding and status discovery, but connecting a credential or discovering a site shall not itself approve that site for telemetry collection. *(Traces to: r04 §4.2 account-level discovery evidence; issue #5 product-owner decision.)*
+- **SOL-F-106**: Solar shall collect telemetry only for the explicitly approved subset of discovered sites. An empty approval set shall collect nothing; a newly discovered site shall remain unapproved until consciously added; and a credential exposing only one site shall not cause implicit approval.
+- **SOL-F-107**: Approval is site-level: once a site is approved, every inverter-class device actually present at that site remains subject to SOL-F-102 without requiring separate per-device approval.
+- **SOL-F-108**: Revoking a site's approval shall stop future telemetry collection for that site before the next collection cycle. Existing telemetry remains governed by the separately approved retention behaviour; revocation shall not silently delete it.
 
 ### 4.2 Identity and capability (SOL-F-2xx)
 
@@ -51,6 +55,7 @@ Each requirement below cites the FoxESS evidence (r04 `SR-*` IDs, or specific r0
 - **SOL-F-204**: Once a variable has been approved as expected for a specific device, its later absence in an acquisition shall be detectable and distinguishable from an unreviewed variable's absence.
 - **SOL-F-205**: An approved expectation shall be able to be retired (for example, following a confirmed firmware or hardware change that genuinely removes a capability) without erasing the historical record that it was once approved.
 - **SOL-F-206**: Where the provider exposes battery identity/capacity evidence (serial, type, model, capacity), Solar shall record it, without assuming a fixed number of batteries per device — the reference site's two physical batteries are wired in parallel and may present as a single aggregate store in live telemetry even though their identity evidence is per-battery. *(Traces to: r04 §4.2, §7 step 3, §9 open question on `batteryList.capicty`.)*
+- **SOL-F-207**: Discovered-but-unapproved site/device identity is onboarding data, not telemetry authority. Solar shall retain or expose only the minimum identity metadata needed to make and review the approval decision, and shall distinguish unapproved sites from approved sites explicitly.
 
 ### 4.3 Normalisation, timestamps, units, provenance (SOL-F-3xx)
 
@@ -92,12 +97,15 @@ Each requirement below cites the FoxESS evidence (r04 `SR-*` IDs, or specific r0
 - **SOL-F-801**: Provider credentials shall never be exposed to any client of Solar's own retrieval interface. *(Traces to: SR-AUTH.)*
 - **SOL-F-802**: While Solar's telemetry retrieval interface has no authentication of its own, it shall only be reachable by explicitly trusted clients, and that trust boundary shall be an explicit, stated assumption rather than an implicit one.
 - **SOL-F-803**: Sensitive account/credential/location data shall be minimised in anything Solar retains or transmits as diagnostic evidence, beyond what is genuinely required to identify and resolve a problem. *(Traces to: r04 §6 item 8, §6.8.)*
+- **SOL-F-804**: Where a provider necessarily returns account-wide inventory while Solar is operating on an approved subset, Solar shall prevent non-approved site/device data from flowing into telemetry calls, durable operational records, raw evidence, routine logs, alerts or diagnostics, except for the minimum separately justified onboarding metadata in SOL-F-207.
+- **SOL-F-805**: Site approval shall be bound to the relevant provider connection/account context. Replacing or broadening a credential shall not silently transfer or expand approval to newly visible sites merely because names or identifiers appear to match.
 
 ### 4.9 Governance, evidence and traceability (SOL-F-9xx)
 
 - **SOL-F-901**: Where a Solar requirement derives from external provider evidence of uncertain completeness (such as the FoxESS capability evidence in r04), that lineage shall remain traceable from the Solar requirement back to the source evidence.
 - **SOL-F-902**: A deliberate departure from validated source evidence (such as beginning production build before a dedicated verification spike is complete) shall be explicitly recorded, including its scope and reasoning, rather than left as an undocumented assumption. *(Traces to: r04a, r04b.)*
 - **SOL-F-903**: An evidence obligation that is deliberately deferred rather than waived shall be tracked as owned, triggered follow-up work, not left open-ended indefinitely. *(Traces to: r04b; tracked in issue #4.)*
+- **SOL-F-904**: Consequential product-boundary decisions shall remain linkable from the issue discussion that records product-owner authority into the authoritative requirements and acceptance evidence. The site-discovery/collection boundary is recorded in issue #5; it is a Solar product decision informed by Eceni Governance baseline 1.1.0, not a new Governance policy.
 
 ## 5. Explicitly deferred (not specified here)
 
