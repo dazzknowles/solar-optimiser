@@ -11,7 +11,7 @@ Solar was created before Eceni had a versioned Governance baseline. It therefore
 | Effective date | Born/current/adopted baseline | Transition decision | Migration state |
 |---|---|---|---|
 | Project creation to 23 September 2026 | None | No versioned Eceni Governance baseline then existed | Historical state; not a claim that Solar was ungoverned or retrospectively conformant |
-| 24 September 2026 | 1.1.0 (first adopted and current) | This adoption record, accepted through its pull request | Adopted with the explicit outstanding work below; no blanket conformance claim |
+| 24 September 2026 | 1.1.0 (first adopted and current) | [Solar adoption pull request #8](https://github.com/dazzknowles/solar-optimiser/pull/8) | Adopted with the explicit outstanding work below; no blanket conformance claim |
 
 Every future transition must add a row rather than replace this history, link its decision, and record applicability changes, exceptions and migration work.
 
